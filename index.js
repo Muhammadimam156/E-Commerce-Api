@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors'); // to allow frontend requests
 const app = express();
-const PORT = 5000;
+require('dotenv').config();
 
 // Enable CORS so frontend can connect
 app.use(cors());
@@ -39,6 +39,8 @@ app.get('/api/products/:id', (req, res) => {
     res.status(404).json({ message: 'Product not found' });
   }
 });
+
+const PORT = process.env.PORT || 3000;
 
 // Start server
 app.listen(PORT, () => {
