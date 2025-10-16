@@ -16,6 +16,14 @@ const products = [
   { id: 6, name: 'Portable Power Bank', price: 35.00, category: 'Accessories', rating: 3, imageUrl: 'path/to/image6.jpg' },
   { id: 7, name: 'Noise Cancelling Earbuds', price: 79.99, category: 'Headphones', rating: 5, imageUrl: 'path/to/image7.jpg' },
   { id: 8, name: 'Webcam 1080p', price: 55.00, category: 'Accessories', rating: 4, imageUrl: 'path/to/image8.jpg' },
+  { id: 9, name: 'Pro Wireless Headphones', price: 149.99, category: 'Headphones', rating: 4, imageUrl: 'path/to/image1.jpg' },
+  { id: 10, name: 'Ultra HD 4K Monitor', price: 399.00, category: 'Monitors', rating: 5, imageUrl: 'path/to/image2.jpg' },
+  { id: 11, name: 'Compact Bluetooth Speaker', price: 45.00, category: 'Speakers', rating: 4, imageUrl: 'path/to/image3.jpg' },
+  { id: 12, name: 'Gaming Mechanical Keyboard', price: 89.99, category: 'Keyboards', rating: 5, imageUrl: 'path/to/image4.jpg' },
+  { id: 13, name: 'Ergonomic Mouse', price: 25.50, category: 'Accessories', rating: 4, imageUrl: 'path/to/image5.jpg' },
+  { id: 14, name: 'Portable Power Bank', price: 35.00, category: 'Accessories', rating: 3, imageUrl: 'path/to/image6.jpg' },
+  { id: 15, name: 'Noise Cancelling Earbuds', price: 79.99, category: 'Headphones', rating: 5, imageUrl: 'path/to/image7.jpg' },
+  { id: 16, name: 'Webcam 1080p', price: 55.00, category: 'Accessories', rating: 4, imageUrl: 'path/to/image8.jpg' },
 ];
 
 // Routes
