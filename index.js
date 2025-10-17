@@ -42,6 +42,117 @@ const products = [
 ;
 
 
+app.use(express.json());
+
+const reviews = [
+  { id: 1, productId: 1, author: 'Alice', rating: 5, comment: 'Amazing sound quality!', date: new Date().toISOString() },
+  { id: 2, productId: 2, author: 'Bob', rating: 4, comment: 'Great monitor for the price.', date: new Date().toISOString() },
+  { id: 3, productId: 1, author: 'Charlie', rating: 4, comment: 'Very comfortable, battery lasts long.', date: new Date().toISOString() },
+];
+
+// Get all reviews (optional filters: productId, minRating)
+app.get('/api/reviews', (req, res) => {
+  let result = reviews.slice();
+  if (req.query.productId) {
+    const pid = parseInt(req.query.productId);
+    if (!Number.isInteger(pid)) return res.status(400).json({ message: 'Invalid productId' });
+    result = result.filter(r => r.productId === pid);
+  }
+  if (req.query.minRating) {
+    const min = parseInt(req.query.minRating);
+    if (!Number.isInteger(min)) return res.status(400).json({ message: 'Invalid minRating' });
+    result = result.filter(r => r.rating >= min);
+  }
+  res.json(result);
+});
+
+// Create a review (body: { productId, author, rating, comment })
+app.post('/api/reviews', (req, res) => {
+  const { productId, author, rating, comment } = req.body;
+  const pid = parseInt(productId);
+  const numRating = parseInt(rating);
+
+  if (!Number.isInteger(pid)) return res.status(400).json({ message: 'productId is required and must be an integer' });
+  const product = products.find(p => p.id === pid);
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  if (!author || typeof author !== 'string') {
+    return res.status(400).json({ message: 'Author is required and must be a string' });
+  }
+  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+    return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
+  }
+  if (!comment || typeof comment !== 'string') {
+    return res.status(400).json({ message: 'Comment is required and must be a string' });
+  }
+
+  const nextId = reviews.length ? Math.max(...reviews.map(r => r.id)) + 1 : 1;
+  const newReview = {
+    id: nextId,
+    productId: pid,
+    author,
+    rating: numRating,
+    comment,
+    date: new Date().toISOString(),
+  };
+
+  reviews.push(newReview);
+  res.status(201).json(newReview);
+});
+
+// Get reviews for a specific product
+app.get('/api/products/:id/reviews', (req, res) => {
+  const productId = parseInt(req.params.id);
+  const product = products.find(p => p.id === productId);
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  const productReviews = reviews.filter(r => r.productId === productId);
+  res.json(productReviews);
+});
+
+// Create a review for a specific product
+app.post('/api/products/:id/reviews', (req, res) => {
+  const productId = parseInt(req.params.id);
+  const product = products.find(p => p.id === productId);
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  const { author, rating, comment } = req.body;
+  const numRating = parseInt(rating);
+
+  if (!author || typeof author !== 'string') {
+    return res.status(400).json({ message: 'Author is required and must be a string' });
+  }
+  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+    return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
+  }
+  if (!comment || typeof comment !== 'string') {
+    return res.status(400).json({ message: 'Comment is required and must be a string' });
+  }
+
+  const nextId = reviews.length ? Math.max(...reviews.map(r => r.id)) + 1 : 1;
+  const newReview = {
+    id: nextId,
+    productId,
+    author,
+    rating: numRating,
+    comment,
+    date: new Date().toISOString(),
+  };
+
+  reviews.push(newReview);
+  res.status(201).json(newReview);
+});
+
+// Delete a review by id
+app.delete('/api/reviews/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const idx = reviews.findIndex(r => r.id === id);
+  if (idx === -1) return res.status(404).json({ message: 'Review not found' });
+  const [deleted] = reviews.splice(idx, 1);
+  res.json(deleted);
+});
+
+
 app.get('/', (req, res) => {
   res.send('Product API is running');
 });
