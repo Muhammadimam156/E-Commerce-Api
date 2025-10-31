@@ -1,182 +1,32 @@
 const express = require('express');
-const cors = require('cors'); 
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const morgan = require('morgan');
+const connectDB = require('./config/db');
+const productRoutes = require('./routes/product.route');
+
 const app = express();
-require('dotenv').config();
+const PORT = 5000;
 
+// middleware
 app.use(cors());
+app.use(bodyParser.json());
+app.use(morgan('dev'));
 
 
-const products = [
-  { id: 1, name: 'Pro Wireless Headphones', price: 149.99, category: 'Headphones', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1606400082777-ef05f3c5cde2?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8UHJvJTIwV2lyZWxlc3MlMjBIZWFkcGhvbmVzfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 2, name: 'Ultra HD 4K Monitor', price: 399.00, category: 'Monitors', rating: 5, imageUrl: 'https://plus.unsplash.com/premium_photo-1669380425564-6e1a281a4d30?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8VWx0cmElMjBIRCUyMDRLJTIwTW9uaXRvcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 3, name: 'Compact Bluetooth Speaker', price: 45.00, category: 'Speakers', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1760088348190-023af514df23?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q29tcGFjdCUyMEJsdWV0b290aCUyMFNwZWFrZXJ8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 4, name: 'Gaming Mechanical Keyboard', price: 89.99, category: 'Keyboards', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1660496379804-b408bfacc9cc?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8R2FtaW5nJTIwTWVjaGFuaWNhbCUyMEtleWJvYXJkfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 5, name: 'Ergonomic Mouse', price: 25.50, category: 'Accessories', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZXJnb25vbWljJTIwbW91c2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 6, name: 'Portable Power Bank', price: 35.00, category: 'Accessories', rating: 3, imageUrl: 'https://images.unsplash.com/photo-1687007081823-42125fa66bb5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fFBvcnRhYmxlJTIwUG93ZXIlMjBCYW5rfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 7, name: 'Noise Cancelling Earbuds', price: 79.99, category: 'Headphones', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1662348317243-64a4fc5416eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fE5vaXNlJTIwQ2FuY2VsbGluZyUyMEVhcmJ1ZHN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 8, name: 'Webcam 1080p', price: 55.00, category: 'Accessories', rating: 4, imageUrl: 'https://plus.unsplash.com/premium_photo-1749338425073-90da4abf7ee0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fFdlYmNhbSUyMDEwODBwfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 9, name: 'Studio Over-Ear Headphones', price: 189.99, category: 'Headphones', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1629083739877-0e52a479aa23?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8U3R1ZGlvJTIwT3Zlci1FYXIlMjBIZWFkcGhvbmVzfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 10, name: 'Budget Wireless Headphones', price: 59.99, category: 'Headphones', rating: 3, imageUrl: 'https://images.unsplash.com/photo-1739764574508-c62f2a48d27b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fEJ1ZGdldCUyMFdpcmVsZXNzJTIwSGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 11, name: 'Curved 27-inch Monitor', price: 329.00, category: 'Monitors', rating: 5, imageUrl: 'https://plus.unsplash.com/premium_photo-1664699099341-b7c4229a8d97?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fEN1cnZlZCUyMDI3LWluY2glMjBNb25pdG9yfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 12, name: 'Full HD 24-inch Monitor', price: 149.00, category: 'Monitors', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1701318134576-6100f43c8531?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fEZ1bGwlMjBIRCUyMDI0LWluY2glMjBNb25pdG9yfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 13, name: 'Mini Portable Speaker', price: 29.99, category: 'Speakers', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1757166757854-ccd9ab926f5a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8TWluaSUyMFBvcnRhYmxlJTIwU3BlYWtlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 14, name: 'Smart WiFi Speaker', price: 99.99, category: 'Speakers', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1752955471067-294a5de5bf48?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U21hcnQlMjBXaUZpJTIwU3BlYWtlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 15, name: 'RGB Gaming Keyboard', price: 79.00, category: 'Keyboards', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1642081562971-8cb227e5dcc9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fFJHQiUyMEdhbWluZyUyMEtleWJvYXJkfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 16, name: 'Compact Office Keyboard', price: 39.00, category: 'Keyboards', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1760348213199-841440b335a2?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q29tcGFjdCUyME9mZmljZSUyMEtleWJvYXJkfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 17, name: 'Wireless Charging Pad', price: 19.99, category: 'Accessories', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1633381638729-27f730955c23?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8V2lyZWxlc3MlMjBDaGFyZ2luZyUyMFBhZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 18, name: 'Adjustable Laptop Stand', price: 45.00, category: 'Accessories', rating: 5, imageUrl: 'https://plus.unsplash.com/premium_photo-1661333524783-65b352331bd8?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDR8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 19, name: 'Belutooth Noise Cancelling Headphones', price: 129.99, category: 'Headphones', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1631586552668-b31039d4921d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8J0JlbHV0b290aCUyME5vaXNlJTIwQ2FuY2VsbGluZyUyMEhlYWRwaG9uZXN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 20, name: 'Studio Reference Monitor', price: 499.99, category: 'Monitors', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1722364230254-8d181f068911?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8U3R1ZGlvJTIwUmVmZXJlbmNlJTIwTW9uaXRvcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 21, name: 'Dual Bass Bluetooth Speaker', price: 65.00, category: 'Speakers', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1714347737848-c50c849737b5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fER1YWwlMjBCYXNzJTIwQmx1ZXRvb3RoJTIwU3BlYWtlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 22, name: 'Silent Mechanical Keyboard', price: 95.00, category: 'Keyboards', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1658423594131-870bc585a9f2?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U2lsZW50JTIwTWVjaGFuaWNhbCUyMEtleWJvYXJkJ3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 23, name: 'Gaming Mouse Pad XL', price: 15.99, category: 'Accessories', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1692726418508-e050bace3d21?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8R2FtaW5nJTIwTW91c2UlMjBQYWQlMjBYTHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 24, name: 'Wireless Vertical Mouse', price: 32.00, category: 'Accessories', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1754928661583-d04a5f4d9f7f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fFdpcmVsZXNzJTIwVmVydGljYWwlMjBNb3VzZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 25, name: 'Classic Wired Headphones', price: 39.99, category: 'Headphones', rating: 3, imageUrl: 'https://images.unsplash.com/photo-1742570922875-e5a60e950307?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Q2xhc3NpYyUyMFdpcmVkJTIwSGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 26, name: '144Hz Gaming Monitor', price: 279.99, category: 'Monitors', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1637946811752-4835a353847d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8MTQ0SHolMjBHYW1pbmclMjBNb25pdG9yfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 27, name: '360° Surround Speaker', price: 119.00, category: 'Speakers', rating: 5, imageUrl: 'https://images.unsplash.com/photo-1637845832244-251bd6e33039?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8MzYwJUMyJUIwJTIwU3Vycm91bmQlMjBTcGVha2VyfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600' },
-  { id: 28, name: 'Wireless RGB Keyboard', price: 99.00, category: 'Keyboards', rating: 4, imageUrl: 'https://plus.unsplash.com/premium_photo-1747375614575-506ac48c2a95?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8V2lyZWxlc3MlMjBSR0IlMjBLZXlib2FyZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 29, name: 'USB-C Hub 7-in-1', price: 49.00, category: 'Accessories', rating: 5, imageUrl: 'https://media.istockphoto.com/id/1155975796/photo/man-holding-mini-adapter-for-laptops-and-flash-memory.webp?a=1&b=1&s=612x612&w=0&k=20&c=GPRtj8khoEj88q64Hphx4unfn_FWdmBiABC01_AqR8w=' },
-  { id: 30, name: 'Cooling Pad for Laptop', price: 27.00, category: 'Accessories', rating: 4, imageUrl: 'https://images.unsplash.com/photo-1634947096506-6d9f114cf64e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Q29vbGluZyUyMFBhZCUyMGZvciUyMExhcHRvcHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-  { id: 31, name: 'Over-Ear Gaming Headphones', price: 99.00, category: 'Headphones', rating: 5, imageUrl: 'https://plus.unsplash.com/premium_photo-1680346528789-0ffcc13f5ebf?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjV8fE92ZXItRWFyJTIwR2FtaW5nJTIwSGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600' },
-]
-;
 
 
-app.use(express.json());
 
-const reviews = [
-  { id: 1, productId: 1, author: 'Alice', rating: 5, comment: 'Amazing sound quality!', date: new Date().toISOString() },
-  { id: 2, productId: 2, author: 'Bob', rating: 4, comment: 'Great monitor for the price.', date: new Date().toISOString() },
-  { id: 3, productId: 1, author: 'Charlie', rating: 4, comment: 'Very comfortable, battery lasts long.', date: new Date().toISOString() },
-];
-
-// Get all reviews (optional filters: productId, minRating)
-app.get('/api/reviews', (req, res) => {
-  let result = reviews.slice();
-  if (req.query.productId) {
-    const pid = parseInt(req.query.productId);
-    if (!Number.isInteger(pid)) return res.status(400).json({ message: 'Invalid productId' });
-    result = result.filter(r => r.productId === pid);
-  }
-  if (req.query.minRating) {
-    const min = parseInt(req.query.minRating);
-    if (!Number.isInteger(min)) return res.status(400).json({ message: 'Invalid minRating' });
-    result = result.filter(r => r.rating >= min);
-  }
-  res.json(result);
-});
-
-// Create a review (body: { productId, author, rating, comment })
-app.post('/api/reviews', (req, res) => {
-  const { productId, author, rating, comment } = req.body;
-  const pid = parseInt(productId);
-  const numRating = parseInt(rating);
-
-  if (!Number.isInteger(pid)) return res.status(400).json({ message: 'productId is required and must be an integer' });
-  const product = products.find(p => p.id === pid);
-  if (!product) return res.status(404).json({ message: 'Product not found' });
-
-  if (!author || typeof author !== 'string') {
-    return res.status(400).json({ message: 'Author is required and must be a string' });
-  }
-  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
-    return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
-  }
-  if (!comment || typeof comment !== 'string') {
-    return res.status(400).json({ message: 'Comment is required and must be a string' });
-  }
-
-  const nextId = reviews.length ? Math.max(...reviews.map(r => r.id)) + 1 : 1;
-  const newReview = {
-    id: nextId,
-    productId: pid,
-    author,
-    rating: numRating,
-    comment,
-    date: new Date().toISOString(),
-  };
-
-  reviews.push(newReview);
-  res.status(201).json(newReview);
-});
-
-// Get reviews for a specific product
-app.get('/api/products/:id/reviews', (req, res) => {
-  const productId = parseInt(req.params.id);
-  const product = products.find(p => p.id === productId);
-  if (!product) return res.status(404).json({ message: 'Product not found' });
-
-  const productReviews = reviews.filter(r => r.productId === productId);
-  res.json(productReviews);
-});
-
-// Create a review for a specific product
-app.post('/api/products/:id/reviews', (req, res) => {
-  const productId = parseInt(req.params.id);
-  const product = products.find(p => p.id === productId);
-  if (!product) return res.status(404).json({ message: 'Product not found' });
-
-  const { author, rating, comment } = req.body;
-  const numRating = parseInt(rating);
-
-  if (!author || typeof author !== 'string') {
-    return res.status(400).json({ message: 'Author is required and must be a string' });
-  }
-  if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
-    return res.status(400).json({ message: 'Rating must be an integer between 1 and 5' });
-  }
-  if (!comment || typeof comment !== 'string') {
-    return res.status(400).json({ message: 'Comment is required and must be a string' });
-  }
-
-  const nextId = reviews.length ? Math.max(...reviews.map(r => r.id)) + 1 : 1;
-  const newReview = {
-    id: nextId,
-    productId,
-    author,
-    rating: numRating,
-    comment,
-    date: new Date().toISOString(),
-  };
-
-  reviews.push(newReview);
-  res.status(201).json(newReview);
-});
-
-// Delete a review by id
-app.delete('/api/reviews/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const idx = reviews.findIndex(r => r.id === id);
-  if (idx === -1) return res.status(404).json({ message: 'Review not found' });
-  const [deleted] = reviews.splice(idx, 1);
-  res.json(deleted);
-});
-
+app.use('/api/products', productRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Product API is running');
+  res.send('✅ Todo API is running...');
 });
 
-
-app.get('/api/products', (req, res) => {
-  res.json(products);
+connectDB().then(() => {
+    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+}).catch((error) => {
+    console.error('❌ Server failed to start:', error.message);
+    process.exit(1);
 });
 
-
-app.get('/api/products/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const product = products.find(p => p.id === id);
-
-  if (product) {
-    res.json(product);
-  } else {
-    res.status(404).json({ message: 'Product not found' });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-
-
-app.listen(PORT, () => {
-  console.log(`✅ Server is running at http://localhost:${PORT}`);
-});
