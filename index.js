@@ -4,11 +4,10 @@ const cors = require('cors');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
 const productRoutes = require('./routes/product.route');
+const reviewRoutes = require('./routes/review.route');
 
 const app = express();
 const PORT = 5000;
-
-// middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(morgan('dev'));
@@ -18,6 +17,7 @@ app.use(morgan('dev'));
 
 
 app.use('/api/products', productRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.get('/', (req, res) => {
   res.send('✅ Todo API is running...');
