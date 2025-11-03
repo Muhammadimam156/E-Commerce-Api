@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const connectDB = require('./config/db');
 const productRoutes = require('./routes/product.route');
 const reviewRoutes = require('./routes/review.route');
+const authRoutes = require('./routes/user.route');
 
 const app = express();
 const PORT = 5000;
@@ -14,6 +15,7 @@ app.use(morgan('dev'));
 
 
 
+app.use('/api/auth', authRoutes);
 
 
 app.use('/api/products', productRoutes);
