@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -9,7 +10,10 @@ const authRoutes = require('./routes/user.route');
 
 const app = express();
 const PORT = 5000;
-app.use(cors());
+app.use(cors({
+origin: ["http://localhost:5173", "https://technobuy-two.vercel.app"],
+credentials: true
+}));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
